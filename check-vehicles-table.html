@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Estrutura da Tabela Vehicles</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .result {
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificar Estrutura da Tabela Vehicles</h1>
+        <p>Este teste verifica se a tabela vehicles está configurada corretamente e se o campo 'year' existe.</p>
+
+        <div>
+            <button onclick="checkTableStructure()">Verificar Estrutura da Tabela</button>
+            <button onclick="testUpdateVehicle()">Testar Atualização de Veículo</button>
+            <button onclick="checkSampleVehicle()">Verificar Veículo de Exemplo</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Configuração do Supabase (substitua pelos seus valores)
+        const SUPABASE_URL = 'https://your-project.supabase.co'
+        const SUPABASE_ANON_KEY = 'your-anon-key'
+        
+        // Função para fazer requisições ao Supabase
+        async function supabaseRequest(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+                    ...options,
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                })
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+                }
+                
+                return await response.json()
+            } catch (error) {
+                console.error('Erro na requisição:', error)
+                throw error
+            }
+        }
+
+        async function checkTableStructure() {
+            const results = document.getElementById('results')
+            results.innerHTML = '<div class="result"><span class="loading"></span>Verificando estrutura da tabela...</div>'
+            
+            try {
+                // Tentar buscar um veículo para ver a estrutura
+                const vehicles = await supabaseRequest('vehicles?select=*&limit=1')
+                
+                if (vehicles && vehicles.length > 0) {
+                    const vehicle = vehicles[0]
+                    const fields = Object.keys(vehicle)
+                    
+                    results.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Estrutura da Tabela Vehicles</h3>
+                            <p><strong>Total de campos:</strong> ${fields.length}</p>
+                            <p><strong>Campos encontrados:</strong></p>
+                            <ul>
+                                ${fields.map(field => `<li>${field}: ${typeof vehicle[field]} (${vehicle[field]})</li>`).join('')}
+                            </ul>
+                            <p><strong>Campo 'year' existe:</strong> ${fields.includes('year') ? '✅ Sim' : '❌ Não'}</p>
+                            <p><strong>Tipo do campo 'year':</strong> ${vehicle.year ? typeof vehicle.year : 'N/A'}</p>
+                        </div>
+                    `
+                } else {
+                    results.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Nenhum veículo encontrado</h3>
+                            <p>A tabela vehicles pode estar vazia ou não existir.</p>
+                        </div>
+                    `
+                }
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Erro ao verificar estrutura</h3>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                        <p><strong>Possíveis causas:</strong></p>
+                        <ul>
+                            <li>Configuração incorreta do Supabase</li>
+                            <li>Tabela vehicles não existe</li>
+                            <li>Permissões insuficientes</li>
+                        </ul>
+                    </div>
+                `
+            }
+        }
+
+        async function testUpdateVehicle() {
+            const results = document.getElementById('results')
+            results.innerHTML = '<div class="result"><span class="loading"></span>Testando atualização de veículo...</div>'
+            
+            try {
+                // Primeiro, buscar um veículo existente
+                const vehicles = await supabaseRequest('vehicles?select=id,name,year&limit=1')
+                
+                if (vehicles && vehicles.length > 0) {
+                    const vehicle = vehicles[0]
+                    const newYear = 2024
+                    
+                    // Tentar atualizar o ano
+                    const updateData = {
+                        year: newYear
+                    }
+                    
+                    const updatedVehicle = await supabaseRequest(`vehicles?id=eq.${vehicle.id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify(updateData)
+                    })
+                    
+                    results.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Teste de Atualização</h3>
+                            <p><strong>Veículo:</strong> ${vehicle.name}</p>
+                            <p><strong>Ano anterior:</strong> ${vehicle.year}</p>
+                            <p><strong>Novo ano:</strong> ${newYear}</p>
+                            <p><strong>Status:</strong> Atualização bem-sucedida</p>
+                        </div>
+                    `
+                } else {
+                    results.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Nenhum veículo para testar</h3>
+                            <p>Não há veículos na tabela para testar a atualização.</p>
+                        </div>
+                    `
+                }
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Erro no teste de atualização</h3>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                        <p>Isso pode indicar problemas com:</p>
+                        <ul>
+                            <li>Permissões de atualização</li>
+                            <li>Estrutura da tabela</li>
+                            <li>Configuração do RLS</li>
+                        </ul>
+                    </div>
+                `
+            }
+        }
+
+        async function checkSampleVehicle() {
+            const results = document.getElementById('results')
+            results.innerHTML = '<div class="result"><span class="loading"></span>Verificando veículo de exemplo...</div>'
+            
+            try {
+                const vehicles = await supabaseRequest('vehicles?select=*&limit=1')
+                
+                if (vehicles && vehicles.length > 0) {
+                    const vehicle = vehicles[0]
+                    
+                    results.innerHTML = `
+                        <div class="result success">
+                            <h3>📊 Veículo de Exemplo</h3>
+                            <pre>${JSON.stringify(vehicle, null, 2)}</pre>
+                        </div>
+                    `
+                } else {
+                    results.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Nenhum veículo encontrado</h3>
+                            <p>A tabela vehicles está vazia.</p>
+                        </div>
+                    `
+                }
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Erro ao buscar veículo</h3>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                    </div>
+                `
+            }
+        }
+
+        // Instruções para configurar
+        console.log('📋 Para usar este teste:')
+        console.log('1. Substitua SUPABASE_URL e SUPABASE_ANON_KEY pelos seus valores')
+        console.log('2. Execute os testes para verificar a estrutura da tabela')
+        console.log('3. Verifique se o campo "year" existe e está configurado corretamente')
+    </script>
+</body>
+</html> 

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - unformatCurrency</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-case {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .input-group {
+            margin: 10px 0;
+        }
+        input {
+            width: 200px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste - unformatCurrency</h1>
+        <p>Este teste verifica se a função unformatCurrency funciona corretamente com diferentes tipos de entrada.</p>
+
+        <div class="input-group">
+            <input type="text" id="testInput" placeholder="Digite um valor para testar">
+            <button onclick="testValue()">Testar Valor</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Função unformatCurrency corrigida
+        function unformatCurrency(value) {
+            if (!value) return ""
+            
+            // Converte para string e remove tudo que não é número
+            return String(value).replace(/[^\d]/g, "")
+        }
+
+        // Função formatPrice para comparação
+        function formatPrice(value) {
+            if (!value) return ""
+            
+            const numbers = String(value).replace(/[^\d]/g, "")
+            
+            if (!numbers) return ""
+            
+            const number = parseInt(numbers)
+            
+            return new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            }).format(number)
+        }
+
+        function testValue() {
+            const input = document.getElementById('testInput').value
+            const results = document.getElementById('results')
+            
+            const testCases = [
+                { input: input, description: "Valor digitado" },
+                { input: "R$ 85.000", description: "Preço formatado" },
+                { input: "85.000", description: "Número com pontos" },
+                { input: "85000", description: "Número sem formatação" },
+                { input: "", description: "String vazia" },
+                { input: null, description: "null" },
+                { input: undefined, description: "undefined" },
+                { input: 85000, description: "Número" },
+                { input: "R$ 1.250,50", description: "Preço com vírgula" },
+                { input: "abc123def", description: "Texto com números" }
+            ]
+            
+            let html = '<h3>📊 Resultados dos Testes:</h3>'
+            
+            testCases.forEach(test => {
+                try {
+                    const result = unformatCurrency(test.input)
+                    const formatted = formatPrice(result)
+                    
+                    html += `
+                        <div class="test-case success">
+                            <strong>${test.description}:</strong><br>
+                            <strong>Entrada:</strong> ${test.input} (${typeof test.input})<br>
+                            <strong>Resultado unformatCurrency:</strong> ${result}<br>
+                            <strong>Formatado novamente:</strong> ${formatted}
+                        </div>
+                    `
+                } catch (error) {
+                    html += `
+                        <div class="test-case error">
+                            <strong>${test.description}:</strong><br>
+                            <strong>Entrada:</strong> ${test.input} (${typeof test.input})<br>
+                            <strong>Erro:</strong> ${error.message}
+                        </div>
+                    `
+                }
+            })
+            
+            results.innerHTML = html
+        }
+
+        // Teste automático ao carregar
+        console.log('🧪 Iniciando testes automáticos...')
+        
+        // Teste com valores que podem causar erro
+        const testValues = ["R$ 85.000", null, undefined, "", 85000]
+        
+        testValues.forEach(value => {
+            try {
+                const result = unformatCurrency(value)
+                console.log(`✅ unformatCurrency("${value}") = "${result}"`)
+            } catch (error) {
+                console.error(`❌ Erro com "${value}":`, error.message)
+            }
+        })
+        
+        console.log('✅ Testes automáticos concluídos!')
+    </script>
+</body>
+</html> 

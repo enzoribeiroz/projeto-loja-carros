@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Como Rodar o Site - Concessionária</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .steps {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .steps li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        .download-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .download-links a {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .download-links a:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Como Rodar o Site da Concessionária</h1>
+        
+        <div class="warning">
+            <h4>⚠️ Node.js Não Encontrado</h4>
+            <p>O projeto precisa do Node.js para funcionar. Vamos instalar e configurar!</p>
+        </div>
+
+        <div class="section">
+            <h3>📥 OPÇÃO 1: Instalar Node.js (Recomendado)</h3>
+            <p>Esta é a melhor opção para desenvolvimento completo:</p>
+            
+            <div class="download-links">
+                <a href="https://nodejs.org/en/download/" target="_blank">🌐 Baixar Node.js</a>
+                <a href="https://nodejs.org/dist/v20.11.0/node-v20.11.0-x64.msi" target="_blank">📦 Windows 64-bit</a>
+                <a href="https://nodejs.org/dist/v20.11.0/node-v20.11.0-x86.msi" target="_blank">📦 Windows 32-bit</a>
+            </div>
+
+            <div class="steps">
+                <h4>Passos para instalação:</h4>
+                <ol>
+                    <li><strong>Baixe o Node.js</strong> do site oficial ou use os links acima</li>
+                    <li><strong>Execute o instalador</strong> e siga as instruções</li>
+                    <li><strong>Reinicie o terminal</strong> após a instalação</li>
+                    <li><strong>Verifique a instalação:</strong> <code>node --version</code></li>
+                    <li><strong>Execute o projeto:</strong> <code>npm run dev</code></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>⚡ OPÇÃO 2: Usar Node Version Manager (NVM)</h3>
+            <p>Para gerenciar múltiplas versões do Node.js:</p>
+            
+            <div class="download-links">
+                <a href="https://github.com/coreybutler/nvm-windows/releases" target="_blank">📦 NVM para Windows</a>
+            </div>
+
+            <div class="steps">
+                <h4>Comandos após instalar NVM:</h4>
+                <ol>
+                    <li><code>nvm install 20.11.0</code> - Instalar Node.js</li>
+                    <li><code>nvm use 20.11.0</code> - Usar a versão</li>
+                    <li><code>npm run dev</code> - Rodar o projeto</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🔧 OPÇÃO 3: Usar Docker (Avançado)</h3>
+            <p>Se você tem Docker instalado:</p>
+            
+            <div class="steps">
+                <h4>Comandos Docker:</h4>
+                <ol>
+                    <li><code>docker run -it --rm -v ${PWD}:/app -w /app -p 3000:3000 node:20 npm run dev</code></li>
+                    <li>Acesse <code>http://localhost:3000</code></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="info">
+            <h4>💡 DICA RÁPIDA</h4>
+            <p>Após instalar o Node.js, execute estes comandos no terminal:</p>
+            <code>npm install</code> - Instalar dependências<br>
+            <code>npm run dev</code> - Iniciar servidor de desenvolvimento
+        </div>
+
+        <div class="success">
+            <h4>✅ APÓS INSTALAR O NODE.JS</h4>
+            <p>O site estará disponível em: <strong>http://localhost:3000</strong></p>
+            <p>Funcionalidades disponíveis:</p>
+            <ul>
+                <li>🚗 Listagem de veículos</li>
+                <li>🔍 Filtros avançados</li>
+                <li>👤 Sistema de autenticação</li>
+                <li>⚙️ Painel administrativo</li>
+                <li>📞 Formulário de contato</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h3>🔍 VERIFICAÇÃO RÁPIDA</h3>
+            <p>Teste se o Node.js foi instalado corretamente:</p>
+            
+            <button onclick="testNodeInstallation()">🧪 Testar Instalação</button>
+            <button onclick="openNodeWebsite()">🌐 Abrir Site Node.js</button>
+            <button onclick="openProjectFiles()">📁 Abrir Pasta do Projeto</button>
+        </div>
+    </div>
+
+    <script>
+        function testNodeInstallation() {
+            alert('Após instalar o Node.js, execute no terminal:\n\nnode --version\nnpm --version\n\nSe mostrar as versões, a instalação foi bem-sucedida!');
+        }
+
+        function openNodeWebsite() {
+            window.open('https://nodejs.org/en/download/', '_blank');
+        }
+
+        function openProjectFiles() {
+            // Tenta abrir o explorador de arquivos na pasta atual
+            window.open('file://' + window.location.pathname.replace('/start-site.html', ''), '_blank');
+        }
+    </script>
+</body>
+</html> 

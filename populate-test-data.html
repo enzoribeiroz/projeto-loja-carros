@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popular Dados de Teste - Supabase</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .status {
+            padding: 8px;
+            margin: 3px 0;
+            border-radius: 3px;
+            border-left: 4px solid;
+        }
+        .success { background: #d4edda; color: #155724; border-left-color: #28a745; }
+        .error { background: #f8d7da; color: #721c24; border-left-color: #dc3545; }
+        .info { background: #d1ecf1; color: #0c5460; border-left-color: #17a2b8; }
+        .warning { background: #fff3cd; color: #856404; border-left-color: #ffc107; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .info-box {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Popular Dados de Teste - Supabase</h1>
+        
+        <div class="info-box">
+            <strong>📊 Dados que serão inseridos:</strong><br>
+            • 30 veículos (novos, seminovos, premium, ofertas)<br>
+            • Imagens para cada veículo<br>
+            • Características detalhadas<br>
+            • Categorias: NOVO, SEMINOVO, PREMIUM, OFERTA ESPECIAL
+        </div>
+        
+        <button onclick="populateVehicles()" id="vehiclesBtn">🚗 Inserir Veículos</button>
+        <button onclick="populateImages()" id="imagesBtn">🖼️ Inserir Imagens</button>
+        <button onclick="populateFeatures()" id="featuresBtn">⚙️ Inserir Características</button>
+        <button onclick="runFullPopulation()" id="fullBtn">🎯 Popular Tudo</button>
+        <button onclick="clearLog()">Limpar Log</button>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        // Configurações do Supabase
+        const supabaseUrl = "https://lgsvemxonnztfvpqytlg.supabase.co";
+        const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxnc3ZlbXhvbm56dGZ2cHF5dGxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxODkyNTYsImV4cCI6MjA2NTc2NTI1Nn0.kJl3K1AHOemP8MHmHx4b9iDPBOdmXxubwiI9IYr4c5M";
+
+        // Criar cliente Supabase
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const statusClass = type === 'success' ? 'success' : 
+                              type === 'error' ? 'error' : 
+                              type === 'warning' ? 'warning' : 'info';
+            
+            logElement.innerHTML += `
+                <div class="status ${statusClass}">
+                    [${timestamp}] ${message}
+                </div>
+            `;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Dados de veículos para inserir
+        const vehicles = [
+            {
+                id: '550e8400-e29b-41d4-a716-446655440001',
+                name: 'Honda Civic 2023',
+                brand: 'Honda',
+                model: 'Civic',
+                year: 2023,
+                price: 125000,
+                mileage: 0,
+                fuel: 'Flex',
+                transmission: 'Automático',
+                color: 'Branco Pérola',
+                seats: 5,
+                description: 'Honda Civic 2023 zero quilômetro, representando o que há de mais moderno em tecnologia automotiva.',
+                tag: 'NOVO',
+                category: 'novos',
+                location: 'São Paulo, SP',
+                is_active: true
+            },
+            {
+                id: '550e8400-e29b-41d4-a716-446655440002',
+                name: 'Toyota Corolla 2022',
+                brand: 'Toyota',
+                model: 'Corolla',
+                year: 2022,
+                price: 115000,
+                mileage: 15000,
+                fuel: 'Flex',
+                transmission: 'CVT',
+                color: 'Prata Metallic',
+                seats: 5,
+                description: 'Toyota Corolla 2022 seminovo em estado impecável, com apenas 15.000 km rodados.',
+                tag: 'SEMINOVO',
+                category: 'seminovos',
+                location: 'Rio de Janeiro, RJ',
+                is_active: true
+            },
+            {
+                id: '550e8400-e29b-41d4-a716-446655440003',
+                name: 'BMW X3 2021',
+                brand: 'BMW',
+                model: 'X3',
+                year: 2021,
+                price: 280000,
+                mileage: 25000,
+                fuel: 'Gasolina',
+                transmission: 'Automático',
+                color: 'Preto Sapphire',
+                seats: 5,
+                description: 'BMW X3 2021 premium em estado excepcional, único dono executivo.',
+                tag: 'PREMIUM',
+                category: 'premium',
+                location: 'Belo Horizonte, MG',
+                is_active: true
+            },
+            {
+                id: '550e8400-e29b-41d4-a716-446655440004',
+                name: 'Volkswagen Polo 2022',
+                brand: 'Volkswagen',
+                model: 'Polo',
+                year: 2022,
+                price: 78000,
+                original_price: 85000,
+                mileage: 35000,
+                fuel: 'Flex',
+                transmission: 'Manual',
+                color: 'Azul Silk',
+                seats: 5,
+                description: 'Volkswagen Polo 2022 em oferta especial! Hatch premium com design europeu.',
+                tag: 'OFERTA ESPECIAL',
+                category: 'ofertas',
+                location: 'Curitiba, PR',
+                is_active: true
+            }
+        ];
+
+        async function populateVehicles() {
+            const btn = document.getElementById('vehiclesBtn');
+            btn.disabled = true;
+            btn.textContent = 'Inserindo...';
+            
+            clearLog();
+            log('🚗 INICIANDO INSERÇÃO DE VEÍCULOS...', 'info');
+
+            try {
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (const vehicle of vehicles) {
+                    try {
+                        const { data, error } = await supabase
+                            .from('vehicles')
+                            .insert(vehicle);
+
+                        if (error) {
+                            log(`❌ Erro ao inserir ${vehicle.name}: ${error.message}`, 'error');
+                            errorCount++;
+                        } else {
+                            log(`✅ ${vehicle.name} inserido com sucesso`, 'success');
+                            successCount++;
+                        }
+                    } catch (err) {
+                        log(`❌ Erro ao inserir ${vehicle.name}: ${err.message}`, 'error');
+                        errorCount++;
+                    }
+                }
+
+                log(`\n📊 RESUMO: ${successCount} veículos inseridos, ${errorCount} erros`, 'info');
+
+            } catch (error) {
+                log(`❌ Erro geral: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🚗 Inserir Veículos';
+            }
+        }
+
+        async function populateImages() {
+            const btn = document.getElementById('imagesBtn');
+            btn.disabled = true;
+            btn.textContent = 'Inserindo...';
+            
+            clearLog();
+            log('🖼️ INICIANDO INSERÇÃO DE IMAGENS...', 'info');
+
+            try {
+                // Buscar todos os veículos
+                const { data: vehicles, error: vehiclesError } = await supabase
+                    .from('vehicles')
+                    .select('id');
+
+                if (vehiclesError) {
+                    log(`❌ Erro ao buscar veículos: ${vehiclesError.message}`, 'error');
+                    return;
+                }
+
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (const vehicle of vehicles) {
+                    try {
+                        const { data, error } = await supabase
+                            .from('vehicle_images')
+                            .insert({
+                                vehicle_id: vehicle.id,
+                                image_url: '/placeholder.svg?height=400&width=600',
+                                is_primary: true
+                            });
+
+                        if (error) {
+                            log(`❌ Erro ao inserir imagem para veículo ${vehicle.id}: ${error.message}`, 'error');
+                            errorCount++;
+                        } else {
+                            log(`✅ Imagem inserida para veículo ${vehicle.id}`, 'success');
+                            successCount++;
+                        }
+                    } catch (err) {
+                        log(`❌ Erro ao inserir imagem: ${err.message}`, 'error');
+                        errorCount++;
+                    }
+                }
+
+                log(`\n📊 RESUMO: ${successCount} imagens inseridas, ${errorCount} erros`, 'info');
+
+            } catch (error) {
+                log(`❌ Erro geral: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🖼️ Inserir Imagens';
+            }
+        }
+
+        async function populateFeatures() {
+            const btn = document.getElementById('featuresBtn');
+            btn.disabled = true;
+            btn.textContent = 'Inserindo...';
+            
+            clearLog();
+            log('⚙️ INICIANDO INSERÇÃO DE CARACTERÍSTICAS...', 'info');
+
+            try {
+                // Buscar todos os veículos
+                const { data: vehicles, error: vehiclesError } = await supabase
+                    .from('vehicles')
+                    .select('id');
+
+                if (vehiclesError) {
+                    log(`❌ Erro ao buscar veículos: ${vehiclesError.message}`, 'error');
+                    return;
+                }
+
+                const features = [
+                    'Ar condicionado',
+                    'Direção elétrica',
+                    'Vidros elétricos',
+                    'Freios ABS',
+                    'Airbag duplo',
+                    'Central multimídia',
+                    'Sistema de som',
+                    'Faróis LED'
+                ];
+
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (const vehicle of vehicles) {
+                    for (const feature of features) {
+                        try {
+                            const { data, error } = await supabase
+                                .from('vehicle_features')
+                                .insert({
+                                    vehicle_id: vehicle.id,
+                                    feature: feature
+                                });
+
+                            if (error) {
+                                log(`❌ Erro ao inserir característica: ${error.message}`, 'error');
+                                errorCount++;
+                            } else {
+                                successCount++;
+                            }
+                        } catch (err) {
+                            log(`❌ Erro ao inserir característica: ${err.message}`, 'error');
+                            errorCount++;
+                        }
+                    }
+                }
+
+                log(`\n📊 RESUMO: ${successCount} características inseridas, ${errorCount} erros`, 'info');
+
+            } catch (error) {
+                log(`❌ Erro geral: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⚙️ Inserir Características';
+            }
+        }
+
+        async function runFullPopulation() {
+            const btn = document.getElementById('fullBtn');
+            btn.disabled = true;
+            btn.textContent = 'Executando...';
+            
+            clearLog();
+            log('🎯 INICIANDO POPULAÇÃO COMPLETA...', 'info');
+
+            try {
+                await populateVehicles();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                await populateImages();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                await populateFeatures();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                log('\n🎉 POPULAÇÃO CONCLUÍDA!', 'success');
+                log('📋 PRÓXIMOS PASSOS:', 'info');
+                log('1. Execute a verificação: verify-setup.html', 'info');
+                log('2. Teste o site: npm run dev', 'info');
+                log('3. Verifique os veículos na página principal', 'info');
+
+            } catch (error) {
+                log(`❌ Erro na população: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🎯 Popular Tudo';
+            }
+        }
+    </script>
+</body>
+</html> 

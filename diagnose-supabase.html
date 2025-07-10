@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Supabase</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 600px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .status {
+            padding: 6px;
+            margin: 2px 0;
+            border-radius: 3px;
+            border-left: 4px solid;
+        }
+        .success { background: #d4edda; color: #155724; border-left-color: #28a745; }
+        .error { background: #f8d7da; color: #721c24; border-left-color: #dc3545; }
+        .info { background: #d1ecf1; color: #0c5460; border-left-color: #17a2b8; }
+        .warning { background: #fff3cd; color: #856404; border-left-color: #ffc107; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .config-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .config-info code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Diagnóstico Completo do Supabase</h1>
+        
+        <div class="config-info">
+            <strong>Configuração atual:</strong><br>
+            URL: <code>https://lgsvemxonnztfvpqytlg.supabase.co</code><br>
+            Chave: <code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code>
+        </div>
+        
+        <div class="section">
+            <h3>🔍 Testes de Diagnóstico</h3>
+            <button onclick="runNetworkTest()" id="networkBtn">Teste de Rede</button>
+            <button onclick="runSupabaseTest()" id="supabaseBtn">Teste Supabase</button>
+            <button onclick="runCorsTest()" id="corsBtn">Teste CORS</button>
+            <button onclick="runFullDiagnostic()" id="fullBtn">Diagnóstico Completo</button>
+            <button onclick="clearLog()">Limpar Log</button>
+        </div>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        // Configurações do Supabase
+        const supabaseUrl = "https://lgsvemxonnztfvpqytlg.supabase.co";
+        const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxnc3ZlbXhvbm56dGZ2cHF5dGxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxODkyNTYsImV4cCI6MjA2NTc2NTI1Nn0.kJl3K1AHOemP8MHmHx4b9iDPBOdmXxubwiI9IYr4c5M";
+
+        // Criar cliente Supabase
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const statusClass = type === 'success' ? 'success' : 
+                              type === 'error' ? 'error' : 
+                              type === 'warning' ? 'warning' : 'info';
+            
+            logElement.innerHTML += `
+                <div class="status ${statusClass}">
+                    [${timestamp}] ${message}
+                </div>
+            `;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function runNetworkTest() {
+            const btn = document.getElementById('networkBtn');
+            btn.disabled = true;
+            btn.textContent = 'Testando...';
+            
+            clearLog();
+            log('🌐 INICIANDO TESTE DE REDE...', 'info');
+
+            try {
+                // Teste 1: Verificar conectividade básica
+                log('1. Testando conectividade básica...', 'info');
+                const startTime = Date.now();
+                const response = await fetch('https://httpbin.org/get');
+                const endTime = Date.now();
+                
+                if (response.ok) {
+                    log(`✅ Conectividade básica OK (${endTime - startTime}ms)`, 'success');
+                } else {
+                    log(`❌ Problema de conectividade: ${response.status}`, 'error');
+                }
+
+                // Teste 2: Verificar DNS
+                log('2. Testando resolução DNS...', 'info');
+                try {
+                    const dnsResponse = await fetch(`https://lgsvemxonnztfvpqytlg.supabase.co/rest/v1/`, {
+                        method: 'HEAD'
+                    });
+                    log('✅ DNS resolvido corretamente', 'success');
+                } catch (dnsError) {
+                    log(`❌ Erro DNS: ${dnsError.message}`, 'error');
+                }
+
+                // Teste 3: Verificar timeout
+                log('3. Testando timeout de conexão...', 'info');
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout')), 10000)
+                );
+                
+                const fetchPromise = fetch(`${supabaseUrl}/rest/v1/`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': supabaseAnonKey,
+                        'Authorization': `Bearer ${supabaseAnonKey}`
+                    }
+                });
+
+                try {
+                    const response = await Promise.race([fetchPromise, timeoutPromise]);
+                    log('✅ Conexão estabelecida sem timeout', 'success');
+                } catch (timeoutError) {
+                    log(`❌ Timeout na conexão: ${timeoutError.message}`, 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Erro no teste de rede: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Teste de Rede';
+            }
+        }
+
+        async function runSupabaseTest() {
+            const btn = document.getElementById('supabaseBtn');
+            btn.disabled = true;
+            btn.textContent = 'Testando...';
+            
+            clearLog();
+            log('🔧 INICIANDO TESTE DO SUPABASE...', 'info');
+
+            try {
+                // Teste 1: Verificar se o cliente foi criado
+                log('1. Verificando cliente Supabase...', 'info');
+                if (supabase) {
+                    log('✅ Cliente Supabase criado', 'success');
+                } else {
+                    log('❌ Falha ao criar cliente', 'error');
+                    return;
+                }
+
+                // Teste 2: Verificar URL da API
+                log('2. Testando URL da API...', 'info');
+                const apiResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': supabaseAnonKey,
+                        'Authorization': `Bearer ${supabaseAnonKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                log(`Status da API: ${apiResponse.status}`, apiResponse.ok ? 'success' : 'error');
+                if (!apiResponse.ok) {
+                    log(`Headers: ${JSON.stringify(Object.fromEntries(apiResponse.headers))}`, 'info');
+                }
+
+                // Teste 3: Verificar autenticação
+                log('3. Testando autenticação...', 'info');
+                const { data: authData, error: authError } = await supabase.auth.getSession();
+                
+                if (authError) {
+                    log(`❌ Erro de autenticação: ${authError.message}`, 'error');
+                } else {
+                    log('✅ Autenticação básica OK', 'success');
+                }
+
+                // Teste 4: Verificar query simples
+                log('4. Testando query simples...', 'info');
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('count')
+                    .limit(1);
+
+                if (error) {
+                    log(`❌ Erro na query: ${error.message}`, 'error');
+                    log(`   Código: ${error.code}`, 'error');
+                    log(`   Detalhes: ${error.details}`, 'error');
+                    log(`   Hint: ${error.hint}`, 'error');
+                } else {
+                    log('✅ Query executada com sucesso', 'success');
+                }
+
+            } catch (error) {
+                log(`❌ Erro no teste Supabase: ${error.message}`, 'error');
+                log(`   Stack: ${error.stack}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Teste Supabase';
+            }
+        }
+
+        async function runCorsTest() {
+            const btn = document.getElementById('corsBtn');
+            btn.disabled = true;
+            btn.textContent = 'Testando...';
+            
+            clearLog();
+            log('🔄 INICIANDO TESTE CORS...', 'info');
+
+            try {
+                // Teste 1: Verificar headers CORS
+                log('1. Verificando headers CORS...', 'info');
+                const corsResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'apikey,authorization,content-type'
+                    }
+                });
+
+                const corsHeaders = corsResponse.headers;
+                log(`CORS Headers:`, 'info');
+                log(`   Access-Control-Allow-Origin: ${corsHeaders.get('access-control-allow-origin')}`, 'info');
+                log(`   Access-Control-Allow-Methods: ${corsHeaders.get('access-control-allow-methods')}`, 'info');
+                log(`   Access-Control-Allow-Headers: ${corsHeaders.get('access-control-allow-headers')}`, 'info');
+
+                // Teste 2: Verificar se a origem está permitida
+                const allowedOrigin = corsHeaders.get('access-control-allow-origin');
+                if (allowedOrigin === '*' || allowedOrigin === window.location.origin) {
+                    log('✅ CORS configurado corretamente', 'success');
+                } else {
+                    log(`❌ CORS não permite esta origem: ${window.location.origin}`, 'error');
+                }
+
+                // Teste 3: Verificar preflight
+                log('2. Testando preflight request...', 'info');
+                const preflightResponse = await fetch(`${supabaseUrl}/rest/v1/users?select=count`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': supabaseAnonKey,
+                        'Authorization': `Bearer ${supabaseAnonKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (preflightResponse.ok) {
+                    log('✅ Preflight request OK', 'success');
+                } else {
+                    log(`❌ Preflight falhou: ${preflightResponse.status}`, 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Erro no teste CORS: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Teste CORS';
+            }
+        }
+
+        async function runFullDiagnostic() {
+            const btn = document.getElementById('fullBtn');
+            btn.disabled = true;
+            btn.textContent = 'Executando...';
+            
+            clearLog();
+            log('🔍 INICIANDO DIAGNÓSTICO COMPLETO...', 'info');
+
+            try {
+                // Executar todos os testes em sequência
+                await runNetworkTest();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                await runSupabaseTest();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                await runCorsTest();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Resumo final
+                log('\n📋 RESUMO DO DIAGNÓSTICO:', 'info');
+                log('1. Verifique se o projeto Supabase está ativo', 'warning');
+                log('2. Confirme se as credenciais estão corretas', 'warning');
+                log('3. Verifique as configurações de CORS no painel', 'warning');
+                log('4. Teste a conectividade de rede', 'warning');
+                log('5. Verifique se o domínio está na lista de permissões', 'warning');
+
+            } catch (error) {
+                log(`❌ Erro no diagnóstico: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Diagnóstico Completo';
+            }
+        }
+    </script>
+</body>
+</html> 

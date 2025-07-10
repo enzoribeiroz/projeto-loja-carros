@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Status do Supabase</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .steps {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .steps li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificar Status do Projeto Supabase</h1>
+        
+        <div class="status-box">
+            <h3>📊 Diagnóstico do Problema</h3>
+            <p>Com base nos testes anteriores, identificamos que:</p>
+            <ul>
+                <li>✅ <strong>Internet funcionando</strong> - Conectividade básica OK</li>
+                <li>❌ <strong>DNS do Supabase falhando</strong> - "Failed to fetch"</li>
+                <li>❌ <strong>Timeout na conexão</strong> - Projeto pode estar inativo</li>
+            </ul>
+        </div>
+
+        <div class="error">
+            <h4>🚨 PROBLEMA IDENTIFICADO</h4>
+            <p><strong>O projeto Supabase parece estar inativo ou as credenciais estão incorretas.</strong></p>
+            <p>URL testada: <code>https://lgsvemxonnztfvpqytlg.supabase.co</code></p>
+        </div>
+
+        <div class="steps">
+            <h3>🔧 SOLUÇÃO PASSO A PASSO</h3>
+            <ol>
+                <li>
+                    <strong>Acesse o painel do Supabase:</strong><br>
+                    <a href="https://supabase.com/dashboard" target="_blank">https://supabase.com/dashboard</a>
+                </li>
+                <li>
+                    <strong>Verifique se o projeto está ativo:</strong><br>
+                    - Procure pelo projeto <code>lgsvemxonnztfvpqytlg</code><br>
+                    - Verifique se o status está "Active" (não "Paused" ou "Suspended")
+                </li>
+                <li>
+                    <strong>Se o projeto estiver pausado:</strong><br>
+                    - Clique no projeto<br>
+                    - Vá em "Settings" → "General"<br>
+                    - Clique em "Resume project" ou "Activate project"
+                </li>
+                <li>
+                    <strong>Verifique as credenciais:</strong><br>
+                    - Vá em "Settings" → "API"<br>
+                    - Confirme que a URL e a chave anônima estão corretas<br>
+                    - Copie as credenciais atualizadas se necessário
+                </li>
+                <li>
+                    <strong>Se as credenciais mudaram:</strong><br>
+                    - Atualize o arquivo <code>lib/supabase.ts</code><br>
+                    - Ou crie um arquivo <code>.env.local</code> com as novas credenciais
+                </li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <h4>⚠️ POSSÍVEIS CAUSAS</h4>
+            <ul>
+                <li><strong>Projeto pausado:</strong> Projetos gratuitos são pausados após inatividade</li>
+                <li><strong>Credenciais incorretas:</strong> URL ou chave anônima podem ter mudado</li>
+                <li><strong>Projeto deletado:</strong> O projeto pode ter sido removido</li>
+                <li><strong>Limite de uso:</strong> Pode ter atingido o limite do plano gratuito</li>
+            </ul>
+        </div>
+
+        <div class="info">
+            <h4>💡 ALTERNATIVAS</h4>
+            <p>Se o projeto não puder ser recuperado:</p>
+            <ol>
+                <li><strong>Criar novo projeto:</strong> Crie um novo projeto no Supabase</li>
+                <li><strong>Executar scripts de setup:</strong> Use os scripts em <code>scripts/</code> para configurar</li>
+                <li><strong>Atualizar credenciais:</strong> Substitua as credenciais no código</li>
+            </ol>
+        </div>
+
+        <div class="success">
+            <h4>✅ APÓS RESOLVER</h4>
+            <p>Depois de ativar o projeto ou corrigir as credenciais:</p>
+            <ol>
+                <li>Execute novamente o diagnóstico: <code>diagnose-supabase.html</code></li>
+                <li>Teste a verificação: <code>verify-setup.html</code></li>
+                <li>Execute o script de verificação: <code>scripts/01-verify-setup.sql</code></li>
+            </ol>
+        </div>
+
+        <button onclick="window.open('https://supabase.com/dashboard', '_blank')">
+            🔗 Abrir Painel Supabase
+        </button>
+        <button onclick="window.open('diagnose-supabase.html', '_blank')">
+            🔍 Executar Diagnóstico
+        </button>
+        <button onclick="window.open('verify-setup.html', '_blank')">
+            ✅ Testar Verificação
+        </button>
+    </div>
+</body>
+</html> 

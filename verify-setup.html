@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação do Setup Supabase</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .status {
+            padding: 8px;
+            margin: 3px 0;
+            border-radius: 3px;
+            border-left: 4px solid;
+        }
+        .success { background: #d4edda; color: #155724; border-left-color: #28a745; }
+        .error { background: #f8d7da; color: #721c24; border-left-color: #dc3545; }
+        .info { background: #d1ecf1; color: #0c5460; border-left-color: #17a2b8; }
+        .warning { background: #fff3cd; color: #856404; border-left-color: #ffc107; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .config-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .config-info code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificação do Setup Supabase</h1>
+        
+        <div class="config-info">
+            <strong>Configuração atual:</strong><br>
+            URL: <code>https://lgsvemxonnztfvpqytlg.supabase.co</code><br>
+            Chave: <code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code>
+        </div>
+        
+        <button onclick="runVerification()" id="verifyBtn">Iniciar Verificação</button>
+        <button onclick="testConnection()" id="testBtn">Testar Conexão Básica</button>
+        <button onclick="clearLog()">Limpar Log</button>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        // Configurações do Supabase
+        const supabaseUrl = "https://lgsvemxonnztfvpqytlg.supabase.co";
+        const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxnc3ZlbXhvbm56dGZ2cHF5dGxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxODkyNTYsImV4cCI6MjA2NTc2NTI1Nn0.kJl3K1AHOemP8MHmHx4b9iDPBOdmXxubwiI9IYr4c5M";
+
+        // Criar cliente Supabase
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const statusClass = type === 'success' ? 'success' : 
+                              type === 'error' ? 'error' : 
+                              type === 'warning' ? 'warning' : 'info';
+            
+            logElement.innerHTML += `
+                <div class="status ${statusClass}">
+                    [${timestamp}] ${message}
+                </div>
+            `;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function testConnection() {
+            const btn = document.getElementById('testBtn');
+            btn.disabled = true;
+            btn.textContent = 'Testando...';
+            
+            clearLog();
+            log('🔧 TESTANDO CONEXÃO BÁSICA...', 'info');
+            log(`URL: ${supabaseUrl}`, 'info');
+            log(`Chave: ${supabaseAnonKey.substring(0, 50)}...`, 'info');
+
+            try {
+                // Teste 1: Verificar se o cliente foi criado
+                log('✅ Cliente Supabase criado', 'success');
+
+                // Teste 2: Verificar se a URL responde
+                log('🌐 Testando conectividade com a URL...', 'info');
+                const response = await fetch(`${supabaseUrl}/rest/v1/`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': supabaseAnonKey,
+                        'Authorization': `Bearer ${supabaseAnonKey}`
+                    }
+                });
+
+                if (response.ok) {
+                    log('✅ URL responde corretamente', 'success');
+                } else {
+                    log(`❌ URL retornou status: ${response.status}`, 'error');
+                }
+
+                // Teste 3: Verificar se conseguimos fazer uma query simples
+                log('📊 Testando query simples...', 'info');
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('count')
+                    .limit(1);
+
+                if (error) {
+                    log(`❌ Erro na query: ${error.message}`, 'error');
+                    log(`   Código: ${error.code}`, 'error');
+                    log(`   Detalhes: ${error.details}`, 'error');
+                } else {
+                    log('✅ Query executada com sucesso', 'success');
+                }
+
+            } catch (error) {
+                log(`❌ Erro de conectividade: ${error.message}`, 'error');
+                log('💡 Possíveis causas:', 'warning');
+                log('   - Problema de CORS', 'warning');
+                log('   - URL do Supabase incorreta', 'warning');
+                log('   - Chave anônima inválida', 'warning');
+                log('   - Problema de rede', 'warning');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Testar Conexão Básica';
+            }
+        }
+
+        async function runVerification() {
+            const btn = document.getElementById('verifyBtn');
+            btn.disabled = true;
+            btn.textContent = 'Verificando...';
+            
+            clearLog();
+            log('🔍 INICIANDO VERIFICAÇÃO COMPLETA DO SUPABASE...', 'info');
+
+            try {
+                // 1. Verificar tabelas
+                log('📋 1. VERIFICANDO TABELAS...', 'info');
+                const { data: tables, error: tablesError } = await supabase
+                    .from('users')
+                    .select('count')
+                    .limit(1);
+
+                if (tablesError) {
+                    log(`❌ Erro ao verificar tabela users: ${tablesError.message}`, 'error');
+                    log(`   Código: ${tablesError.code}`, 'error');
+                    if (tablesError.details) {
+                        log(`   Detalhes: ${tablesError.details}`, 'error');
+                    }
+                } else {
+                    log('✅ Tabela users acessível', 'success');
+                }
+
+                // 2. Verificar usuários
+                log('\n👥 2. VERIFICANDO USUÁRIOS...', 'info');
+                const { data: users, error: usersError } = await supabase
+                    .from('users')
+                    .select('email, is_admin')
+                    .limit(10);
+
+                if (usersError) {
+                    log(`❌ Erro ao verificar usuários: ${usersError.message}`, 'error');
+                    log(`   Código: ${usersError.code}`, 'error');
+                } else {
+                    log(`✅ Usuários encontrados: ${users?.length || 0}`, 'success');
+                    users?.forEach(user => {
+                        log(`   - ${user.email} (${user.is_admin ? 'ADMIN' : 'USER'})`, 'info');
+                    });
+                }
+
+                // 3. Verificar veículos
+                log('\n🚗 3. VERIFICANDO VEÍCULOS...', 'info');
+                const { data: vehicles, error: vehiclesError } = await supabase
+                    .from('vehicles')
+                    .select('name, brand, model, is_active')
+                    .limit(10);
+
+                if (vehiclesError) {
+                    log(`❌ Erro ao verificar veículos: ${vehiclesError.message}`, 'error');
+                    log(`   Código: ${vehiclesError.code}`, 'error');
+                } else {
+                    log(`✅ Veículos encontrados: ${vehicles?.length || 0}`, 'success');
+                    vehicles?.forEach(vehicle => {
+                        log(`   - ${vehicle.brand} ${vehicle.model} (${vehicle.is_active ? 'ATIVO' : 'INATIVO'})`, 'info');
+                    });
+                }
+
+                // 4. Teste de conexão realtime
+                log('\n🔄 4. TESTANDO REALTIME...', 'info');
+                const channel = supabase
+                    .channel('test-verification')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'vehicles' }, 
+                        (payload) => {
+                            log(`✅ Realtime funcionando: ${payload.eventType}`, 'success');
+                        })
+                    .subscribe();
+
+                setTimeout(() => {
+                    log('✅ Realtime configurado', 'success');
+                    supabase.removeChannel(channel);
+                }, 2000);
+
+                // 5. Teste de autenticação
+                log('\n🔐 5. TESTANDO AUTENTICAÇÃO...', 'info');
+                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                    email: 'caio@caio.com',
+                    password: '6464'
+                });
+
+                if (authError) {
+                    log(`❌ Erro na autenticação: ${authError.message}`, 'error');
+                    log(`   Código: ${authError.code}`, 'error');
+                } else {
+                    log('✅ Autenticação funcionando', 'success');
+                    log(`   - Usuário: ${authData.user?.email}`, 'info');
+                }
+
+                // 6. Verificar outras tabelas
+                log('\n📊 6. VERIFICANDO OUTRAS TABELAS...', 'info');
+                
+                const tablesToCheck = ['vehicle_images', 'vehicle_features', 'favorites', 'contacts', 'seller_info'];
+                
+                for (const tableName of tablesToCheck) {
+                    try {
+                        const { data, error } = await supabase
+                            .from(tableName)
+                            .select('count')
+                            .limit(1);
+                        
+                        if (error) {
+                            log(`❌ Tabela ${tableName}: ${error.message}`, 'error');
+                            log(`   Código: ${error.code}`, 'error');
+                        } else {
+                            log(`✅ Tabela ${tableName}: OK`, 'success');
+                        }
+                    } catch (err) {
+                        log(`❌ Erro ao verificar ${tableName}: ${err.message}`, 'error');
+                    }
+                }
+
+                log('\n🎉 VERIFICAÇÃO CONCLUÍDA!', 'success');
+                log('📋 RESUMO:', 'info');
+                log('- Verifique se todas as tabelas estão acessíveis', 'info');
+                log('- Confirme se a autenticação está funcionando', 'info');
+                log('- Teste se o realtime está configurado', 'info');
+
+            } catch (error) {
+                log(`❌ Erro durante a verificação: ${error.message}`, 'error');
+                log('💡 SUGESTÕES:', 'warning');
+                log('   - Verifique se o projeto Supabase está ativo', 'warning');
+                log('   - Confirme se as credenciais estão corretas', 'warning');
+                log('   - Teste a conectividade de rede', 'warning');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Iniciar Verificação';
+            }
+        }
+    </script>
+</body>
+</html> 

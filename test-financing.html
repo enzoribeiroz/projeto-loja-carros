@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Calculadora de Financiamento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .price-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .error {
+            background: #ffe8e8;
+            color: #d32f2f;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .vehicle-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .vehicle-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste - Calculadora de Financiamento</h1>
+        <p>Este teste verifica se os preços dos veículos estão sendo passados corretamente para a calculadora.</p>
+    </div>
+
+    <div class="container">
+        <h2>📊 Teste de Formatação de Preços</h2>
+        
+        <div class="test-section">
+            <h3>1. Teste de Preços Formatados</h3>
+            <p>Digite diferentes formatos de preço para testar a conversão:</p>
+            
+            <input type="text" id="testPrice" class="price-input" placeholder="Digite um preço (ex: R$ 50.000,00 ou 50000)">
+            <button onclick="testPriceFormat()">Testar Formatação</button>
+            
+            <div id="priceResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Simulação de Veículos</h3>
+            <p>Clique nos veículos abaixo para simular a seleção:</p>
+            
+            <div class="vehicle-card">
+                <h4>🚗 Honda Civic 2022</h4>
+                <p class="vehicle-price">R$ 85.000,00</p>
+                <button onclick="selectVehicle('85000')">Selecionar Veículo</button>
+            </div>
+            
+            <div class="vehicle-card">
+                <h4>🚙 Toyota Corolla 2023</h4>
+                <p class="vehicle-price">R$ 95.500,00</p>
+                <button onclick="selectVehicle('95500')">Selecionar Veículo</button>
+            </div>
+            
+            <div class="vehicle-card">
+                <h4>🏎️ BMW 320i 2021</h4>
+                <p class="vehicle-price">R$ 180.000,00</p>
+                <button onclick="selectVehicle('180000')">Selecionar Veículo</button>
+            </div>
+            
+            <div class="vehicle-card">
+                <h4>🚐 Fiat Toro 2023</h4>
+                <p class="vehicle-price">R$ 125.000,00</p>
+                <button onclick="selectVehicle('125000')">Selecionar Veículo</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Calculadora Simulada</h3>
+            <p>Preço selecionado: <span id="selectedPrice" style="font-weight: bold; color: #007bff;">Nenhum</span></p>
+            
+            <label>Valor do Veículo:</label>
+            <input type="text" id="vehiclePriceInput" class="price-input" placeholder="R$ 0" readonly>
+            
+            <label>Entrada (%):</label>
+            <select id="downPayment" onchange="calculateFinancing()">
+                <option value="20">20% - Recomendado</option>
+                <option value="30">30% - Boa entrada</option>
+                <option value="40">40% - Entrada alta</option>
+            </select>
+            
+            <label>Prazo (meses):</label>
+            <select id="loanTerm" onchange="calculateFinancing()">
+                <option value="60">60 meses</option>
+                <option value="48">48 meses</option>
+                <option value="36">36 meses</option>
+            </select>
+            
+            <label>Taxa de Juros (% ao mês):</label>
+            <select id="interestRate" onchange="calculateFinancing()">
+                <option value="1.2">1,2% - Score regular</option>
+                <option value="1.0">1,0% - Bom score</option>
+                <option value="1.5">1,5% - Score baixo</option>
+            </select>
+            
+            <div id="calculationResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔍 Diagnóstico</h2>
+        <div id="diagnostic" class="result">
+            <p><strong>Status:</strong> <span id="status">Aguardando teste...</span></p>
+            <p><strong>Último preço processado:</strong> <span id="lastProcessedPrice">Nenhum</span></p>
+            <p><strong>Valor numérico extraído:</strong> <span id="numericValue">Nenhum</span></p>
+        </div>
+    </div>
+
+    <script>
+        let currentSelectedPrice = null;
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        function extractNumericPrice(priceString) {
+            // Remove tudo que não é número
+            const numbers = String(priceString).replace(/[^\d]/g, "");
+            return Number.parseInt(numbers) || 0;
+        }
+
+        function testPriceFormat() {
+            const input = document.getElementById('testPrice').value;
+            const numericValue = extractNumericPrice(input);
+            const formatted = formatCurrency(numericValue);
+            
+            const result = document.getElementById('priceResult');
+            result.style.display = 'block';
+            result.innerHTML = `
+                <p><strong>Preço digitado:</strong> ${input}</p>
+                <p><strong>Valor numérico extraído:</strong> ${numericValue}</p>
+                <p><strong>Preço formatado:</strong> ${formatted}</p>
+            `;
+            
+            updateDiagnostic(input, numericValue);
+        }
+
+        function selectVehicle(price) {
+            currentSelectedPrice = price;
+            const numericPrice = extractNumericPrice(price);
+            const formatted = formatCurrency(numericPrice);
+            
+            document.getElementById('selectedPrice').textContent = formatted;
+            document.getElementById('vehiclePriceInput').value = formatted;
+            
+            updateDiagnostic(price, numericPrice);
+            calculateFinancing();
+        }
+
+        function calculateFinancing() {
+            const priceInput = document.getElementById('vehiclePriceInput').value;
+            const price = extractNumericPrice(priceInput);
+            
+            if (price <= 0) {
+                document.getElementById('calculationResult').style.display = 'none';
+                return;
+            }
+            
+            const downPercent = Number.parseFloat(document.getElementById('downPayment').value) / 100;
+            const termMonths = Number.parseInt(document.getElementById('loanTerm').value);
+            const monthlyRate = Number.parseFloat(document.getElementById('interestRate').value) / 100;
+            
+            const downPaymentAmount = price * downPercent;
+            const loanAmount = price - downPaymentAmount;
+            
+            // Cálculo usando fórmula de juros compostos
+            const monthlyPayment = (loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, termMonths))) / 
+                                 (Math.pow(1 + monthlyRate, termMonths) - 1);
+            const totalAmount = monthlyPayment * termMonths + downPaymentAmount;
+            const totalInterest = totalAmount - price;
+            
+            const result = document.getElementById('calculationResult');
+            result.style.display = 'block';
+            result.innerHTML = `
+                <h4>📊 Resultado da Simulação</h4>
+                <p><strong>Parcela Mensal:</strong> ${formatCurrency(monthlyPayment)}</p>
+                <p><strong>Valor da Entrada:</strong> ${formatCurrency(downPaymentAmount)}</p>
+                <p><strong>Valor Financiado:</strong> ${formatCurrency(loanAmount)}</p>
+                <p><strong>Total de Juros:</strong> ${formatCurrency(totalInterest)}</p>
+                <p><strong>Valor Total:</strong> ${formatCurrency(totalAmount)}</p>
+            `;
+        }
+
+        function updateDiagnostic(inputPrice, numericValue) {
+            document.getElementById('status').textContent = 'Teste realizado';
+            document.getElementById('lastProcessedPrice').textContent = inputPrice;
+            document.getElementById('numericValue').textContent = numericValue;
+        }
+
+        // Teste inicial
+        console.log('🧪 Teste de Financiamento iniciado');
+        console.log('✅ Funções de formatação carregadas');
+    </script>
+</body>
+</html> 

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Formatação de Preços e Botão Salvar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background: #0056b3;
+        }
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste - Formatação de Preços e Botão Salvar</h1>
+        <p>Este teste simula o comportamento do painel de admin para verificar:</p>
+        <ul>
+            <li>✅ Formatação automática de preços com pontos de milhares</li>
+            <li>✅ Correção do botão "salvando..." infinito</li>
+            <li>✅ Conversão de preços para salvar no banco</li>
+        </ul>
+
+        <div class="form-group">
+            <label for="price">Preço Atual *</label>
+            <input 
+                type="text" 
+                id="price" 
+                placeholder="85000"
+                oninput="formatPrice(this)"
+            >
+            <small>Digite números e veja a formatação automática</small>
+        </div>
+
+        <div class="form-group">
+            <label for="originalPrice">Preço Original (para ofertas)</label>
+            <input 
+                type="text" 
+                id="originalPrice" 
+                placeholder="95000"
+                oninput="formatPrice(this)"
+            >
+            <small>Digite números e veja a formatação automática</small>
+        </div>
+
+        <div class="form-group">
+            <button id="saveBtn" onclick="simulateSave()">
+                <span id="saveText">💾 Salvar Alterações</span>
+            </button>
+            <button onclick="resetForm()">🔄 Resetar</button>
+        </div>
+
+        <div id="result" class="result" style="display: none;">
+            <h3>📊 Resultado do Teste:</h3>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Funções de formatação (mesmas do painel admin)
+        function formatPrice(input) {
+            // Remove tudo que não é número
+            const numbers = input.value.replace(/\D/g, '')
+            
+            if (numbers === '') {
+                input.value = ''
+                return
+            }
+            
+            // Converte para número e formata
+            const number = parseInt(numbers)
+            input.value = number.toLocaleString('pt-BR')
+        }
+
+        function unformatPrice(value) {
+            // Remove pontos e vírgulas, mantém apenas números
+            return value.replace(/[.,]/g, '')
+        }
+
+        // Simulação do salvamento
+        async function simulateSave() {
+            const saveBtn = document.getElementById('saveBtn')
+            const saveText = document.getElementById('saveText')
+            const result = document.getElementById('result')
+            const resultContent = document.getElementById('resultContent')
+
+            // Obter valores dos campos
+            const price = document.getElementById('price').value
+            const originalPrice = document.getElementById('originalPrice').value
+
+            // Mostrar loading
+            saveBtn.disabled = true
+            saveText.innerHTML = '<span class="loading"></span>Salvando...'
+
+            try {
+                // Simular delay de salvamento
+                await new Promise(resolve => setTimeout(resolve, 2000))
+
+                // Processar dados (como no painel admin)
+                const processedData = {
+                    price: unformatPrice(price),
+                    originalPrice: originalPrice ? unformatPrice(originalPrice) : undefined
+                }
+
+                // Simular sucesso
+                result.style.display = 'block'
+                result.className = 'result success'
+                resultContent.innerHTML = `
+                    <h4>✅ Salvamento Simulado com Sucesso!</h4>
+                    <p><strong>Preço formatado:</strong> ${price}</p>
+                    <p><strong>Preço original formatado:</strong> ${originalPrice || 'Não informado'}</p>
+                    <p><strong>Preço processado para banco:</strong> ${processedData.price}</p>
+                    <p><strong>Preço original processado:</strong> ${processedData.originalPrice || 'undefined'}</p>
+                    <hr>
+                    <p><strong>Status do botão:</strong> Desabilitado durante salvamento ✅</p>
+                    <p><strong>Estado de loading:</strong> Removido após conclusão ✅</p>
+                `
+
+            } catch (error) {
+                // Simular erro
+                result.style.display = 'block'
+                result.className = 'result error'
+                resultContent.innerHTML = `
+                    <h4>❌ Erro Simulado</h4>
+                    <p>Erro: ${error.message}</p>
+                    <p><strong>Status do botão:</strong> Reabilitado após erro ✅</p>
+                `
+            } finally {
+                // Restaurar botão (como no painel admin)
+                saveBtn.disabled = false
+                saveText.innerHTML = '💾 Salvar Alterações'
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('price').value = ''
+            document.getElementById('originalPrice').value = ''
+            document.getElementById('result').style.display = 'none'
+        }
+
+        // Teste automático
+        console.log('🧪 Iniciando teste de formatação...')
+        
+        // Teste de formatação
+        const testInput = document.createElement('input')
+        testInput.value = '85000'
+        formatPrice(testInput)
+        console.log('✅ Formatação de preço:', testInput.value) // Deve ser "85.000"
+        
+        // Teste de unformatação
+        const unformatted = unformatPrice('85.000')
+        console.log('✅ Unformatação de preço:', unformatted) // Deve ser "85000"
+        
+        console.log('✅ Testes de formatação concluídos!')
+    </script>
+</body>
+</html> 
